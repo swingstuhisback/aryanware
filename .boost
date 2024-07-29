@@ -1,10 +1,48 @@
 local Players = game:GetService("Players") local player = Players.LocalPlayer local sound = Instance.new("Sound") sound.SoundId = "rbxassetid://9059590824" sound.Parent = player:WaitForChild("PlayerGui") sound:Play() sound.Ended:Connect(function() sound:Destroy() end) local coreGui = game:GetService("CoreGui") local screenGui = Instance.new("ScreenGui", coreGui) local textLabel = Instance.new("TextLabel", screenGui) textLabel.Text = "aryanware" textLabel.Size = UDim2.new(0, 600, 0, 50) textLabel.Position = UDim2.new(0.5, -300, 0.5, -25) textLabel.BackgroundTransparency = 1 textLabel.TextColor3 = Color3.fromRGB(128, 0, 128) textLabel.TextStrokeTransparency = 0.8 textLabel.TextScaled = true textLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0) textLabel.TextTransparency = 1 local function tweenTextLabel(textLabel, goal, duration) local tweenService = game:GetService("TweenService") local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle.Quad, Enum.EasingDirection.Out) local tween = tweenService:Create(textLabel, tweenInfo, goal) tween:Play() tween.Completed:Wait() end tweenTextLabel(textLabel, {TextTransparency = 0}, 1) wait(1) tweenTextLabel(textLabel, {Position = UDim2.new(0.5, -300, 0, 10), Size = UDim2.new(0, 600, 0, 50)}, 1) tweenTextLabel(textLabel, {Position = UDim2.new(0.5, -textLabel.Size.X.Offset/2, 0, 10)}, 0.5)
 getgenv().SilentKeyy = 'c'
-getgenv().PredictionAmmount = 0.237
+getgenv().PredictionAmmount = 0.278
+getgenv().ogPos = "none"
+
+-- item position
+
+--local game.Workspace.Ignored.Shop["[Revolver] - $1485"]
+--local game.Workspace.Ignored.Shop["[Double-Barrel SG] - $1485"].Head
+--local game.Workspace.Ignored.Shop["[LMG] - $3978"]
+getgenv().revoCFrame = "533.654968, 1.72500229, -248.940033, -1.1920929e-07, 0, 1.00000012, 0, 1, 0, -1.00000012, 0, -1.1920929e-07"
+getgenv().dbCFrame = "-1039.59985, 18.8513641, -256.449951, -1, 0, 0, 0, 1, 0, 0, 0, -1"
+getgenv().lmgCFame = "-620.882263, 20.2999878, -305.339264, 1, 0, 0, 0, 1, 0, 0, 0, 1"
+
+-- food position
+
+--local game.Workspace.Ignored.Shop["[Taco] - $2"]
+--local game.Workspace.Ignored.Shop["[Chicken] - $7"]
+--local game.Workspace.Ignored.Shop["[Hamburger] - $11"]
+getgenv().hambCFrame = "-605.575012, 18.9750004, 289.925049, 0, 0, -1, 0, -1, -0, -1, 0, -0"
+getgenv().tacoCFrame = "584.026855, 48.1605072, -474.033936, 1, 0, 0, 0, 1, 0, 0, 0, 1"
+getgenv().chickenCFrame = "-322.046021, 24.2827263, -296.468079, 0, 0, -1, 0, 1, 0, 1, 0, 0"
+
+-- ammo position
+
+--local game.Workspace.Ignored.Shop["18 [Double-Barrel SG Ammo] - $64"]
+--local game.Workspace.Ignored.Shop["12 [Revolver Ammo] - $53"]
+--local game.Workspace.Ignored.Shop["200 [LMG Ammo] - $318"]
+getgenv().lmgAmmoCFrame = "-616.182312, 20.3000107, -305.339172, -1, 0, 0, 0, 1, 0, 0, 0, -1"
+getgenv().dbAmmoCFrame = "-1046.20032, 18.8513641, -256.449951, -1, 0, 0, 0, 1, 0, 0, 0, -1"
+getgenv().revoAmmoCFrame = "533.654968, 1.73051262, -257.540009, -1.1920929e-07, 0, 1.00000012, 0, 1, 0, -1.00000012, 0, -1.1920929e-07"
+
+-- armor position
+
+--local game.Workspace.Ignored.Shop["[Medium Armor] - $1326"]
+--local game.Workspace.Ignored.Shop["[High-Medium Armor] - $2440"]
+--local game.Workspace.Ignored.Shop["[Fire Armor] - $2493"]
+getgenv().mediumArmorCFrame = "409.312225, 45.1269989, -54.6504784, -1, 0, 0, 0, 1, 0, 0, 0, -1"
+getgenv().highArmorCFrame = "-934.025024, -28.149826, 570.549683, 1, 0, 0, 0, 1, 0, 0, 0, 1"
+getgenv().fireArmorCFrame = "-934.027588, -4.87227058, 151.993652, 1, -0, 0, 0, 1, 8.63220121e-05, -0, -8.63220121e-05, 1"
+
 
 --// Main Libarys \\--
-local libary = loadstring(game:HttpGet("https://raw.githubusercontent.com/imagoodpersond/puppyware/main/lib"))()
-local NotifyLibrary = loadstring(game:HttpGet("https://raw.githubusercontent.com/imagoodpersond/puppyware/main/notify"))()
+local libary = loadstring(game:HttpGet("https://raw.githubusercontent.com/swingstuhisback/aryanware/main/homo.lib"))()
+local NotifyLibrary = loadstring(game:HttpGet("https://raw.githubusercontent.com/swingstuhisback/aryanware/main/homo.notif"))()
 local Notify = NotifyLibrary.Notify
 --// Service Handler \\--
 local GetService = setmetatable({}, {
@@ -28,7 +66,7 @@ local tweenService = GetService.TweenService
 local ReplicatedStorage = GetService.ReplicatedStorage
 local http = GetService.HttpService
 local lighting = GetService.Lighting
-makefolder("puppywarereborn")
+makefolder("aryanware")
 
 --// Start \\--
 local PuppySettings = {
@@ -110,8 +148,8 @@ local PuppySettings = {
         Thickness = 2
     },
  Esp = {
-  Enabled = false,
-  Bones = false,
+  Enabled = true,
+  Bones = true,
  },
  TriggerBot = {
         Enabled = false,
@@ -147,18 +185,23 @@ local PuppyModule = {
 }
 
 local Window = libary:new({name = "aryanware reborn", accent = Color3.fromRGB(208, 0, 255), textsize = 13})
-local AimingTab = Window:page({name = "aim"})
 
-local VisualTab = Window:page({name = "esp"})
+local AimingTab = Window:page({name = "aim"})
+local AATab = Window:page({name = "anti-aim"})
+local VisualTab = Window:page({name = "visuals"})
 local MiscTab = Window:page({name = "misc"})
+local BuyTab = Window:page({name = "items"})
 
 local VisualMainSection = VisualTab:section({name = "main",side = "left", size = 200})
-
+local VisualSkySection = VisualTab:section({name = "sky & misc",side = "right", size = 200})
 local MiscMoveSettings = MiscTab:section({name = "movement",side = "left", size = 200})
 local MiscCharSettings = MiscTab:section({name = "char",side = "left", size = 50})
+local MiscFunSettings = MiscTab:section({name = "interesting", side = "right", size = 50})
 
-
-
+local BuyGunSection = BuyTab:section({name = "weapons", side = "left", size = 150})
+local BuyAmmoSection = BuyTab:section({name = "ammo", side = "right", size = 150})
+local BuyArmorSection = BuyTab:section({name = "armor", side = "right", size = 150})
+local BuyFoodSection = BuyTab:section({name = "food", side = "left", size = 100})
 
 -- Aimbot Section --
 local AimbotSection = AimingTab:section({name = "aimlock", side = "right",size = 113})
@@ -187,12 +230,176 @@ AimbotSettings:slider({name = "prediction velocity", def = 10, max = 60, min = 1
 end})
 
 --// Visual Sections
+local wantedEnabled = false -- Variable to track wanted ESP toggle state
+
 VisualMainSection:toggle({name = "esp enabled", def = false, callback = function(Boolean)
- PuppySettings.Esp.Enabled = Boolean
+    getgenv().nameEnabled = Boolean
+
+    local c = workspace.CurrentCamera
+    local ps = game:GetService("Players")
+    local lp = ps.LocalPlayer
+    local rs = game:GetService("RunService")
+
+    -- Check if nameEnabled is true
+    local function isNameEnabled()
+        return getgenv().nameEnabled == true
+    end
+
+    local espObjects = {} -- Store ESP objects for reuse
+
+    local function createESPText(p)
+        local text = Drawing.new("Text")
+        text.Visible = false
+        text.Center = true
+        text.Outline = true 
+        text.Font = 2
+        text.Color = Color3.fromRGB(255, 255, 255)
+        text.Size = 13
+        espObjects[p.UserId] = {NameText = text, WantedText = nil} -- Store the text object by player UserId
+        return text
+    end
+
+    local function createWantedText(p)
+        local wantedText = Drawing.new("Text")
+        wantedText.Visible = false
+        wantedText.Center = true
+        wantedText.Outline = true 
+        wantedText.Font = 2
+        wantedText.Color = Color3.fromRGB(255, 0, 0) -- Change color for wanted text
+        wantedText.Size = 13
+        espObjects[p.UserId].WantedText = wantedText -- Store wanted text
+        return wantedText
+    end
+
+    local function esp(p, cr)
+        local h = cr:WaitForChild("Humanoid")
+        local hrp = cr:WaitForChild("Head")
+        local nameText = createESPText(p) -- Create or get ESP text
+        local wantedText = createWantedText(p) -- Create or get wanted text
+
+        local c1, c2, c3
+
+        local function dc()
+            nameText.Visible = false
+            nameText:Remove()
+            wantedText.Visible = false
+            wantedText:Remove()
+            espObjects[p.UserId] = nil -- Clean up the reference
+            if c1 then c1:Disconnect() c1 = nil end
+            if c2 then c2:Disconnect() c2 = nil end
+            if c3 then c3:Disconnect() c3 = nil end
+        end
+
+        c2 = cr.AncestryChanged:Connect(function(_, parent)
+            if not parent then
+                dc()
+            end
+        end)
+
+        c3 = h.HealthChanged:Connect(function(v)
+            if (v <= 0) or (h:GetState() == Enum.HumanoidStateType.Dead) then
+                dc()
+            end
+        end)
+
+        c1 = rs.RenderStepped:Connect(function()
+            if isNameEnabled() then
+                local hrp_pos, hrp_onscreen = c:WorldToViewportPoint(hrp.Position)
+                if hrp_onscreen then
+                    nameText.Position = Vector2.new(hrp_pos.X, hrp_pos.Y - 30)
+                    nameText.Text = p.Name
+                    nameText.Visible = true
+
+                    -- Check if wanted ESP is enabled
+                    if wantedEnabled then
+                        local wantedValue = p:FindFirstChild("leaderstats") and p.leaderstats:FindFirstChild("Wanted")
+                        if wantedValue then
+                            wantedText.Position = Vector2.new(hrp_pos.X, hrp_pos.Y - 50) -- Position above the name
+                            wantedText.Text = "Wanted: " .. wantedValue.Value
+                            wantedText.Visible = true
+                        else
+                            wantedText.Visible = false
+                        end
+                    else
+                        wantedText.Visible = false
+                    end
+                else
+                    nameText.Visible = false
+                    wantedText.Visible = false
+                end
+            else
+                nameText.Visible = false
+                wantedText.Visible = false
+            end
+        end)
+    end
+
+    local function p_added(p)
+        if p.Character then
+            esp(p, p.Character)
+        end
+        p.CharacterAdded:Connect(function(cr)
+            esp(p, cr)
+        end)
+    end
+
+    for _, p in next, ps:GetPlayers() do 
+        if p ~= lp then
+            p_added(p)
+        end
+    end
+
+    ps.PlayerAdded:Connect(p_added)
+
+    -- Monitor changes to nameEnabled in a separate thread
+    spawn(function()
+        while true do
+            wait(1) -- Check every second to reduce performance impact
+            if isNameEnabled() then
+                for _, p in next, ps:GetPlayers() do 
+                    if p ~= lp and not espObjects[p.UserId] then
+                        p_added(p) -- Add ESP if player has no character
+                    end
+                end
+            end
+        end
+    end)
 end})
 
-VisualMainSection:toggle({name = "bone esp", def = false, callback = function(Boolean)
- PuppySettings.Esp.Bones = Boolean
+VisualMainSection:toggle({name = "wanted esp", def = false, callback = function(Boolean)
+    wantedEnabled = Boolean -- Update the variable based on toggle state
+end})
+
+
+VisualSkySection:toggle({name = "shadows", def = true, callback = function(Boolean)
+    game.Lighting.GlobalShadows = Boolean
+end})
+
+
+VisualSkySection:button({name = "purple skybox", callback = function()
+    local sky = game.Lighting.Sky
+wait(1)
+sky.SkyboxBk = "rbxassetid://7088408872"
+sky.SkyboxDn = "rbxassetid://7088397282"
+sky.SkyboxFt = "rbxassetid://7088413584"
+sky.SkyboxLf = "rbxassetid://7088411493"
+sky.SkyboxRt = "rbxassetid://7088391586"
+sky.SkyboxUp = "rbxassetid://7088394088"
+sky.StarCount = 0
+sky.SunAngularSize = 0
+sky.CelestialBodiesShown = false
+sky.MoonAngularSize = 0
+end})
+
+VisualSkySection:toggle({name = "always day", def = false, callback = function(Boolean)
+getgenv().skyTime = Boolean
+
+    local function updateClockTime()
+        if getgenv().skyTime then
+            game:GetService("Lighting").ClockTime = 12
+        end
+    end
+    game:GetService("RunService").Heartbeat:Connect(updateClockTime)
 end})
 
 --// Misc Sections
@@ -204,30 +411,149 @@ TimeTick = hookfunction(wait, function(JumpCooldown)
     return TimeTick(JumpCooldown)
 end)
 
-MiscMoveSettings:toggle({name = "walk", def = false, callback = function(Boolean)
+MiscMoveSettings:toggle({name = "walkspeed", def = false, callback = function(Boolean)
  PuppySettings.Misc.CFrameSpeed.Enabled = Boolean
 end})
 
-MiscMoveSettings:keybind({name = "walk keybind", def = Enum.KeyCode.V, callback = function(Key)
+MiscMoveSettings:keybind({name = "walkspeed keybind", def = Enum.KeyCode.V, callback = function(Key)
  PuppySettings.Misc.CFrameSpeed.Keybind = Key
 end})
 
-MiscMoveSettings:slider({name = "speed value", def = 100, max = 1000, min = 0, rounding = true, callback = function(Value)
+MiscMoveSettings:slider({name = "walkspeed value", def = 100, max = 1000, min = 0, rounding = true, callback = function(Value)
  PuppySettings.Misc.CFrameSpeed.Speed = tonumber(Value)/100
 end})
-
-MiscMoveSettings:toggle({name = "bhop", def = false, callback = function(Boolean)
-    PuppySettings.Misc.CFrameSpeed.Bhop = Boolean
-   end})
-
-MiscMoveSettings:toggle({name = "autostrafe", def = false, callback = function(Boolean)
- PuppySettings.Misc.Strafe = Boolean
-end})
-
 
 -- Misc Char
 MiscCharSettings:button({name = "reset (ragdolled)", callback = function()
  NilBody()
+end})
+
+MiscFunSettings:button({name = "the curse", callback = function()
+local newSoundId = "rbxassetid://9059590824" local function replaceSoundIds(parent) for _, child in pairs(parent:GetChildren()) do if child:IsA("Sound") then child.SoundId = newSoundId end replaceSoundIds(child) end end replaceSoundIds(game.Workspace.Vehicles) while wait(1) do replaceSoundIds(game.Workspace.Vehicles) end
+end})
+
+-- item buyer
+
+BuyGunSection:button({name = "buy revolver ($1485)", callback = function()
+    wait(0.1)
+    getgenv().ogPos = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame
+    wait(0.1)
+    local player = game.Players.LocalPlayer if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then  player.Character.HumanoidRootPart.CFrame = CFrame.new(unpack(getgenv().revoCFrame:split(", ")))  end
+    wait(0.3)
+    fireclickdetector(game.Workspace.Ignored.Shop["[Revolver] - $1485"].ClickDetector)
+    wait(0.1)
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = getgenv().ogPos
+   end})
+
+BuyGunSection:button({name = "buy double-barrel ($1485)", callback = function()
+    wait(0.1)
+    getgenv().ogPos = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame
+    wait(0.1)
+    local player = game.Players.LocalPlayer if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then  player.Character.HumanoidRootPart.CFrame = CFrame.new(unpack(getgenv().dbCFrame:split(", ")))  end
+    wait(0.3)
+    fireclickdetector(game.Workspace.Ignored.Shop["[Double-Barrel SG] - $1485"].ClickDetector)
+    wait(0.1)
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = getgenv().ogPos
+end})
+
+BuyGunSection:button({name = "buy LMG ($3978)", callback = function()
+    wait(0.1)
+    getgenv().ogPos = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame
+    wait(0.1)
+    local player = game.Players.LocalPlayer if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then  player.Character.HumanoidRootPart.CFrame = CFrame.new(unpack(getgenv().lmgCFame:split(", ")))  end
+    wait(0.3)
+    fireclickdetector(game.Workspace.Ignored.Shop["[LMG] - $3978"].ClickDetector)
+    wait(0.1)
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = getgenv().ogPos
+end})
+
+BuyAmmoSection:button({name = "buy revolver ammo ($53)", callback = function()
+    wait(0.1)
+    getgenv().ogPos = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame
+    wait(0.1)
+    local player = game.Players.LocalPlayer if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then  player.Character.HumanoidRootPart.CFrame = CFrame.new(unpack(getgenv().revoAmmoCFrame:split(", ")))  end
+    wait(0.3)
+    fireclickdetector(game.Workspace.Ignored.Shop["12 [Revolver Ammo] - $53"].ClickDetector)
+    wait(0.1)
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = getgenv().ogPos
+end})
+
+BuyAmmoSection:button({name = "buy db ammo ($64)", callback = function()
+    wait(0.1)
+    getgenv().ogPos = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame
+    wait(0.1)
+    local player = game.Players.LocalPlayer if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then  player.Character.HumanoidRootPart.CFrame = CFrame.new(unpack(getgenv().dbAmmoCFrame:split(", ")))  end
+    wait(0.3)
+    fireclickdetector(game.Workspace.Ignored.Shop["18 [Double-Barrel SG Ammo] - $64"].ClickDetector)
+    wait(0.1)
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = getgenv().ogPos
+end})
+
+BuyAmmoSection:button({name = "buy LMG ammo ($318)", callback = function()
+    wait(0.1)
+    getgenv().ogPos = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame
+    wait(0.1)
+    local player = game.Players.LocalPlayer if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then  player.Character.HumanoidRootPart.CFrame = CFrame.new(unpack(getgenv().lmgAmmoCFrame:split(", ")))  end
+    wait(0.3)
+    fireclickdetector(game.Workspace.Ignored.Shop["200 [LMG Ammo] - $318"].ClickDetector)
+    wait(0.1)
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = getgenv().ogPos
+end})
+
+BuyArmorSection:button({name = "buy medium armor ($1326)", callback = function()
+    wait(0.1)
+    getgenv().ogPos = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame
+    wait(0.1)
+    local player = game.Players.LocalPlayer if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then  player.Character.HumanoidRootPart.CFrame = CFrame.new(unpack(getgenv().mediumArmorCFrame:split(", ")))  end
+    wait(0.3)
+    fireclickdetector(game.Workspace.Ignored.Shop["[Medium Armor] - $1326"].ClickDetector)
+    wait(0.1)
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = getgenv().ogPos
+end})
+
+
+BuyArmorSection:button({name = "buy high-medium armor ($2440)", callback = function()
+    wait(0.1)
+    getgenv().ogPos = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame
+    wait(0.1)
+    local player = game.Players.LocalPlayer if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then  player.Character.HumanoidRootPart.CFrame = CFrame.new(unpack(getgenv().highArmorCFrame:split(", ")))  end
+    wait(0.3)
+    fireclickdetector(game.Workspace.Ignored.Shop["[High-Medium Armor] - $2440"].ClickDetector)
+    wait(0.1)
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = getgenv().ogPos
+end})
+
+BuyArmorSection:button({name = "buy fire armor ($2493)", callback = function()
+    wait(0.1)
+    getgenv().ogPos = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame
+    wait(0.1)
+    local player = game.Players.LocalPlayer if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then  player.Character.HumanoidRootPart.CFrame = CFrame.new(unpack(getgenv().fireArmorCFrame:split(", ")))  end
+    wait(0.3)
+    fireclickdetector(game.Workspace.Ignored.Shop["[Fire Armor] - $2493"].ClickDetector)
+    wait(0.1)
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = getgenv().ogPos
+end})
+
+BuyFoodSection:button({name = "tacodick ($2)", callback = function()
+    wait(0.1)
+    getgenv().ogPos = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame
+    wait(0.1)
+    local player = game.Players.LocalPlayer if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then  player.Character.HumanoidRootPart.CFrame = CFrame.new(unpack(getgenv().tacoCFrame:split(", ")))  end
+    wait(0.3)
+    fireclickdetector(game.Workspace.Ignored.Shop["[Taco] - $2"].ClickDetector)
+    wait(0.1)
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = getgenv().ogPos
+end})
+
+BuyFoodSection:button({name = "buy kfc ($7)", callback = function()
+    wait(0.1)
+    getgenv().ogPos = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame
+    wait(0.1)
+    local player = game.Players.LocalPlayer if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then  player.Character.HumanoidRootPart.CFrame = CFrame.new(unpack(getgenv().chickenCFrame:split(", ")))  end
+    wait(0.3)
+    fireclickdetector(game.Workspace.Ignored.Shop["[Chicken] - $7"].ClickDetector)
+    wait(0.1)
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = getgenv().ogPos
 end})
 
 
@@ -240,7 +566,7 @@ getgenv().AimlockKey = "c"
 getgenv().AimRadius = 30 
 getgenv().ThirdPerson = true 
 getgenv().FirstPerson = true
-getgenv().PredictionVelocity = 11
+getgenv().PredictionVelocity = 14
 
 local Players, Uis, RService, SGui = game:GetService"Players", game:GetService"UserInputService", game:GetService"RunService", game:GetService"StarterGui";
 local Client, Mouse, Camera, CF, RNew, Vec3, Vec2 = Players.LocalPlayer, Players.LocalPlayer:GetMouse(), workspace.CurrentCamera, CFrame.new, Ray.new, Vector3.new, Vector2.new;
@@ -632,7 +958,7 @@ Mouse.KeyDown:connect(function(key)
             end
             if PuppySettings.SilentAim.NotificationMode and Plr ~= game.Players.LocalPlayer then
                 Notify({
-                    Title = "Puppyware",
+                    Title = "aryanware",
                     Description = "Locked Onto: "..Plr.DisplayName,
                     Duration = 3
                 })
@@ -643,7 +969,7 @@ Mouse.KeyDown:connect(function(key)
    Plr = game.Players.LocalPlayer
             if PuppySettings.SilentAim.NotificationMode then
                 Notify({
-                    Title = "Puppyware",
+                    Title = "aryanware",
                     Description = "Unlocked",
                     Duration = 3
                 })
@@ -774,4 +1100,3 @@ game:GetService("RunService").Heartbeat:Connect(function()
         wait(0.001)
     end -- auto clciker
 end)
-
