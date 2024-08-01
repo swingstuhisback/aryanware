@@ -1,7 +1,13 @@
+getgenv().stableBuild = false
+
+
 local Players = game:GetService("Players") local player = Players.LocalPlayer local sound = Instance.new("Sound") sound.SoundId = "rbxassetid://9059590824" sound.Parent = player:WaitForChild("PlayerGui") sound:Play() sound.Ended:Connect(function() sound:Destroy() end) local coreGui = game:GetService("CoreGui") local screenGui = Instance.new("ScreenGui", coreGui) local textLabel = Instance.new("TextLabel", screenGui) textLabel.Text = "aryanware" textLabel.Size = UDim2.new(0, 600, 0, 50) textLabel.Position = UDim2.new(0.5, -300, 0.5, -25) textLabel.BackgroundTransparency = 1 textLabel.TextColor3 = Color3.fromRGB(128, 0, 128) textLabel.TextStrokeTransparency = 0.8 textLabel.TextScaled = true textLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0) textLabel.TextTransparency = 1 local function tweenTextLabel(textLabel, goal, duration) local tweenService = game:GetService("TweenService") local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle.Quad, Enum.EasingDirection.Out) local tween = tweenService:Create(textLabel, tweenInfo, goal) tween:Play() tween.Completed:Wait() end tweenTextLabel(textLabel, {TextTransparency = 0}, 1) wait(1) tweenTextLabel(textLabel, {Position = UDim2.new(0.5, -300, 0, 10), Size = UDim2.new(0, 600, 0, 50)}, 1) tweenTextLabel(textLabel, {Position = UDim2.new(0.5, -textLabel.Size.X.Offset/2, 0, 10)}, 0.5)
 getgenv().SilentKeyy = 'c'
 getgenv().PredictionAmmount = 0.278
 getgenv().ogPos = "none"
+
+getgenv().aryanLBYamt = 0
+getgenv().aryanLBY = false
 
 -- item position
 
@@ -51,6 +57,9 @@ local GetService = setmetatable({}, {
     end
 })
 --// Services \\--
+local HighlightFolder = nil
+local currentHighlight = nil
+local currentTarget = nil
 local RunService = GetService.RunService
 local Players = GetService.Players
 local LocalPlayer = Players.LocalPlayer
@@ -69,6 +78,7 @@ local lighting = GetService.Lighting
 makefolder("aryanware")
 
 --// Start \\--
+getgenv().targetChams = false
 local PuppySettings = {
     SilentAim = {
         Enabled = false,
@@ -184,7 +194,7 @@ local PuppyModule = {
     Instance = {}
 }
 
-local Window = libary:new({name = "aryanware reborn", accent = Color3.fromRGB(208, 0, 255), textsize = 13})
+local Window = libary:new({name = "aryanware reborn [v0.4b]", accent = Color3.fromRGB(208, 0, 255), textsize = 13})
 
 local AimingTab = Window:page({name = "aim"})
 local AATab = Window:page({name = "anti-aim"})
@@ -192,27 +202,118 @@ local VisualTab = Window:page({name = "visuals"})
 local MiscTab = Window:page({name = "misc"})
 local BuyTab = Window:page({name = "items"})
 
+local aaMainSection = AATab:section({name = "aryanware camera breaker",side = "left", size = 200})
+
 local VisualMainSection = VisualTab:section({name = "main",side = "left", size = 200})
 local VisualSkySection = VisualTab:section({name = "sky & misc",side = "right", size = 200})
+local VisualPurpSection = VisualTab:section({name = "purple modifiers",side = "right", size = 200})
 local MiscMoveSettings = MiscTab:section({name = "movement",side = "left", size = 200})
 local MiscCharSettings = MiscTab:section({name = "char",side = "left", size = 50})
 local MiscFunSettings = MiscTab:section({name = "interesting", side = "right", size = 50})
+local MiscDbgSettings = MiscTab:section({name = "debug tools", side = "right", size = 150})
 
 local BuyGunSection = BuyTab:section({name = "weapons", side = "left", size = 150})
 local BuyAmmoSection = BuyTab:section({name = "ammo", side = "right", size = 150})
 local BuyArmorSection = BuyTab:section({name = "armor", side = "right", size = 150})
 local BuyFoodSection = BuyTab:section({name = "food", side = "left", size = 100})
 
+
 -- Aimbot Section --
-local AimbotSection = AimingTab:section({name = "aimlock", side = "right",size = 113})
+local AimbotSection = AimingTab:section({name = "aimlock [C]", side = "right",size = 200})
 AimbotSection:toggle({name = "aimlock enabled", def = true, callback = function(Boolean)
     PuppySettings.Aimbot.Enabled = Boolean
 end})
+
 
 AimbotSection:toggle({name = "prediction", def = true, callback = function(Boolean)
     PuppySettings.Aimbot.Prediction = Boolean
 end})
 
+AimbotSection:toggle({name = "target chams", def = false, callback = function(Boolean)
+    getgenv().targetChams = Boolean
+    if getgenv().targetChams then
+        local FillColor = Color3.fromRGB(193, 0, 255)
+        local DepthMode = "AlwaysOnTop"
+        local FillTransparency = 0.35
+        local OutlineColor = Color3.fromRGB(255, 255, 255)
+        local OutlineTransparency = 0.5
+
+        local CoreGui = game:GetService("CoreGui")
+        local Players = game:GetService("Players")
+        local lp = Players.LocalPlayer
+        local connections = {}
+
+        HighlightFolder = Instance.new("Folder")
+        HighlightFolder.Parent = CoreGui
+        HighlightFolder.Name = "Highlight_Storage"
+
+        local function Highlight(plr)
+            if plr.Team == lp.Team then return end
+            local highlight = Instance.new("Highlight")
+            highlight.Name = plr.Name
+            highlight.FillColor = FillColor
+            highlight.DepthMode = DepthMode
+            highlight.FillTransparency = FillTransparency
+            highlight.OutlineColor = OutlineColor
+            highlight.OutlineTransparency = OutlineTransparency
+            highlight.Parent = HighlightFolder
+
+            local function updateHighlight(char)
+                if highlight and char then
+                    highlight.Adornee = char
+                end
+            end
+
+            plr.CharacterAdded:Connect(updateHighlight)
+            if plr.Character then
+                updateHighlight(plr.Character)
+            end
+
+            connections[plr] = plr.CharacterRemoving:Connect(function()
+                if highlight then
+                    highlight.Adornee = nil
+                end
+            end)
+        end
+
+        Players.PlayerAdded:Connect(Highlight)
+        for _, v in pairs(Players:GetPlayers()) do
+            Highlight(v)
+        end
+
+        Players.PlayerRemoving:Connect(function(plr)
+            local plrname = plr.Name
+            if HighlightFolder:FindFirstChild(plrname) then
+                HighlightFolder[plrname]:Destroy()
+            end
+            if connections[plr] then
+                connections[plr]:Disconnect()
+            end
+        end)
+
+        lp.CharacterAdded:Connect(function()
+            for _, v in pairs(connections) do
+                v:Disconnect()
+            end
+            table.clear(connections)
+            HighlightFolder:ClearAllChildren()
+        end)
+    else
+        if HighlightFolder then
+            HighlightFolder:Destroy()
+            HighlightFolder = nil
+        end
+    end
+end
+})
+
+local function removeHighlight()
+if currentHighlight then
+    currentHighlight:Destroy()
+    currentHighlight = nil
+    currentTarget = nil
+end
+end
 AimbotSection:dropdown({name = "aim hitbox", def = "HumanoidRootPart", max = 4, options = {"Head","HumanoidRootPart"}, callback = function(part)
     PuppySettings.Aimbot.Hitboxes = part
 end})
@@ -228,6 +329,30 @@ end})
 AimbotSettings:slider({name = "prediction velocity", def = 10, max = 60, min = 10, rounding = true, callback = function(Value)
     PuppySettings.AimbotSettings.PredictionVelocity = Value
 end})
+
+-- antilock
+
+aaMainSection:toggle({name = "anti-lock", def = false, callback = function(Boolean)
+    getgenv().aryanLBY = Boolean
+end})
+
+aaMainSection:keybind({name = "anti-lock keybind", def = Enum.KeyCode.Z, callback = function(Key)
+        getgenv().aryanLBY = not getgenv().aryanLBY
+   end})
+
+game:GetService("RunService").RenderStepped:Connect(function()
+    getgenv().aryanLBYamt = math.random(-420, 420)
+end)
+
+-- Apply anti-lock effect on heartbeat
+game:GetService("RunService").Heartbeat:Connect(function()
+    if getgenv().aryanLBY then
+        local vel = game.Players.LocalPlayer.Character.HumanoidRootPart.Velocity
+        game.Players.LocalPlayer.Character.HumanoidRootPart.Velocity = Vector3.new(0, getgenv().aryanLBYamt, 0)
+        game:GetService("RunService").RenderStepped:Wait()
+        game.Players.LocalPlayer.Character.HumanoidRootPart.Velocity = vel
+    end
+end)
 
 --// Visual Sections
 local wantedEnabled = false -- Variable to track wanted ESP toggle state
@@ -303,43 +428,47 @@ VisualMainSection:toggle({name = "esp enabled", def = false, callback = function
         end)
 
         c1 = rs.RenderStepped:Connect(function()
-            if isNameEnabled() then
-                local hrp_pos, hrp_onscreen = c:WorldToViewportPoint(hrp.Position)
-                if hrp_onscreen then
-                    nameText.Position = Vector2.new(hrp_pos.X, hrp_pos.Y - 30)
-                    nameText.Text = p.Name
-                    nameText.Visible = true
+            pcall(function()
+                if isNameEnabled() then
+                    local hrp_pos, hrp_onscreen = c:WorldToViewportPoint(hrp.Position)
+                    if hrp_onscreen then
+                        nameText.Position = Vector2.new(hrp_pos.X, hrp_pos.Y - 30)
+                        nameText.Text = p.Name
+                        nameText.Visible = true
 
-                    -- Check if wanted ESP is enabled
-                    if wantedEnabled then
-                        local wantedValue = p:FindFirstChild("leaderstats") and p.leaderstats:FindFirstChild("Wanted")
-                        if wantedValue then
-                            wantedText.Position = Vector2.new(hrp_pos.X, hrp_pos.Y - 50) -- Position above the name
-                            wantedText.Text = "Wanted: " .. wantedValue.Value
-                            wantedText.Visible = true
+                        -- Check if wanted ESP is enabled
+                        if wantedEnabled then
+                            local wantedValue = p:FindFirstChild("leaderstats") and p.leaderstats:FindFirstChild("Wanted")
+                            if wantedValue then
+                                wantedText.Position = Vector2.new(hrp_pos.X, hrp_pos.Y - 50) -- Position above the name
+                                wantedText.Text = "wanted: " .. wantedValue.Value
+                                wantedText.Visible = true
+                            else
+                                wantedText.Visible = false
+                            end
                         else
                             wantedText.Visible = false
                         end
                     else
+                        nameText.Visible = false
                         wantedText.Visible = false
                     end
                 else
                     nameText.Visible = false
                     wantedText.Visible = false
                 end
-            else
-                nameText.Visible = false
-                wantedText.Visible = false
-            end
+            end)
         end)
     end
 
     local function p_added(p)
-        if p.Character then
-            esp(p, p.Character)
-        end
-        p.CharacterAdded:Connect(function(cr)
-            esp(p, cr)
+        pcall(function()
+            if p.Character then
+                esp(p, p.Character)
+            end
+            p.CharacterAdded:Connect(function(cr)
+                esp(p, cr)
+            end)
         end)
     end
 
@@ -355,13 +484,15 @@ VisualMainSection:toggle({name = "esp enabled", def = false, callback = function
     spawn(function()
         while true do
             wait(1) -- Check every second to reduce performance impact
-            if isNameEnabled() then
-                for _, p in next, ps:GetPlayers() do 
-                    if p ~= lp and not espObjects[p.UserId] then
-                        p_added(p) -- Add ESP if player has no character
+            pcall(function()
+                if isNameEnabled() then
+                    for _, p in next, ps:GetPlayers() do 
+                        if p ~= lp and not espObjects[p.UserId] then
+                            p_added(p) -- Add ESP if player has no character
+                        end
                     end
                 end
-            end
+            end)
         end
     end)
 end})
@@ -375,8 +506,24 @@ VisualSkySection:toggle({name = "shadows", def = true, callback = function(Boole
     game.Lighting.GlobalShadows = Boolean
 end})
 
+VisualSkySection:toggle({name = "always day", def = false, callback = function(Boolean)
+getgenv().skyTime = Boolean
 
-VisualSkySection:button({name = "purple skybox", callback = function()
+    local function updateClockTime()
+        if getgenv().skyTime then
+            game:GetService("Lighting").ClockTime = 12
+        end
+    end
+    game:GetService("RunService").Heartbeat:Connect(updateClockTime)
+end})
+
+VisualSkySection:button({name = "chat revealer", callback = function()
+    game.Players.LocalPlayer.PlayerGui.Chat.Frame.Visible = true
+    game.Players.LocalPlayer.PlayerGui.Chat.Frame.ChatBarParentFrame.Visible = true
+    game.Players.LocalPlayer.PlayerGui.Chat.Frame.ChatChannelParentFrame.Visible = true
+end})
+
+VisualPurpSection:button({name = "purple skybox", callback = function()
     local sky = game.Lighting.Sky
 wait(1)
 sky.SkyboxBk = "rbxassetid://7088408872"
@@ -391,15 +538,313 @@ sky.CelestialBodiesShown = false
 sky.MoonAngularSize = 0
 end})
 
-VisualSkySection:toggle({name = "always day", def = false, callback = function(Boolean)
-getgenv().skyTime = Boolean
+VisualPurpSection:button({name = "purple items", callback = function()
+    if game.PlaceId == 2788229376 then
+        local Material = Enum.Material.ForceField -- this changes material of weapon
+        local Color = Color3.fromRGB(135, 25, 255) -- this changes color of weapon
+    
+        game:GetService"RunService".RenderStepped:Connect(function()
+            if game.Players.LocalPlayer.Character:FindFirstChild("[Glock]") then
+                game.Players.LocalPlayer.Character["[Glock]"].Default.Material = Material
+                game.Players.LocalPlayer.Character["[Glock]"].Default.Color = Color
+                game.Players.LocalPlayer.Character["[Glock]"].Default.TextureID = ""
+            end
+        end)
 
-    local function updateClockTime()
-        if getgenv().skyTime then
-            game:GetService("Lighting").ClockTime = 12
-        end
+        game:GetService("RunService").RenderStepped:Connect(function()
+            local tool = game.Players.LocalPlayer.Character:FindFirstChild("Wallet")
+        
+            if tool then
+                if tool:FindFirstChild("Handle") then
+                    local handle = tool.Handle
+                    handle.BillboardGui.TextLabel.TextColor3 = Color
+                    handle.Material = Material
+                    handle.Color = Color
+                    handle.UsePartColor = true
+                end
+                for _, child in ipairs(tool:GetChildren()) do
+                    if child.Name == "Part" then
+                        for _, decal in ipairs(child:GetChildren()) do
+                            if decal:IsA("Decal") then
+                                decal:Destroy()
+                            end
+                        end
+                        child.Material = Material
+                        child.Color = Color
+        
+                    end
+                end
+            end
+        end)
+
+        game:GetService"RunService".RenderStepped:Connect(function()
+            if game.Players.LocalPlayer.Character:FindFirstChild("[Phone]") then
+                game.Players.LocalPlayer.Character["[Phone]"]["[Regular]"].Material = Material
+                game.Players.LocalPlayer.Character["[Phone]"]["[Regular]"].Color = Color
+                game.Players.LocalPlayer.Character["[Phone]"]["[Regular]"].TextureID = ""
+
+                game.Players.LocalPlayer.Character["[Phone]"]["[Old Phone]"].Material = Material
+                game.Players.LocalPlayer.Character["[Phone]"]["[Old Phone]"].Color = Color
+                game.Players.LocalPlayer.Character["[Phone]"]["[Old Phone]"].TextureID = ""
+
+                game.Players.LocalPlayer.Character["[Phone]"]["[Orange Phone]"].Material = Material
+                game.Players.LocalPlayer.Character["[Phone]"]["[Orange Phone]"].Color = Color
+                game.Players.LocalPlayer.Character["[Phone]"]["[Orange Phone]"].TextureID = ""
+
+                game.Players.LocalPlayer.Character["[Phone]"]["[PinkPhone]"].Material = Material
+                game.Players.LocalPlayer.Character["[Phone]"]["[PinkPhone]"].Color = Color
+                game.Players.LocalPlayer.Character["[Phone]"]["[PinkPhone]"].TextureID = ""
+
+                game.Players.LocalPlayer.Character["[Phone]"]["[Tele]"].Material = Material
+                game.Players.LocalPlayer.Character["[Phone]"]["[Tele]"].Color = Color
+                game.Players.LocalPlayer.Character["[Phone]"]["[Tele]"].TextureID = ""
+                
+                game.Players.LocalPlayer.Character["[Phone]"]["[iPhone]"].Material = Material
+                game.Players.LocalPlayer.Character["[Phone]"]["[iPhone]"].Color = Color
+                game.Players.LocalPlayer.Character["[Phone]"]["[iPhone]"].TextureID = ""
+
+
+            end
+        end)
+
+        game:GetService"RunService".RenderStepped:Connect(function()
+            if game.Players.LocalPlayer.Character:FindFirstChild("[Chicken]") then
+                game.Players.LocalPlayer.Character["[Chicken]"].Handle.Part.Material = Material
+                game.Players.LocalPlayer.Character["[Chicken]"].Handle.Part.Color = Color
+                game.Players.LocalPlayer.Character["[Chicken]"].Handle.Part.TextureID = ""
+            end
+        end)
+
+        game:GetService"RunService".RenderStepped:Connect(function()
+            if game.Players.LocalPlayer.Character:FindFirstChild("[Taco]") then
+                game.Players.LocalPlayer.Character["[Taco]"].Handle.Part.Material = Material
+                game.Players.LocalPlayer.Character["[Taco]"].Handle.Part.Color = Color
+                game.Players.LocalPlayer.Character["[Taco]"].Handle.Part.TextureID = ""
+            end
+        end)
+        
+        game:GetService"RunService".RenderStepped:Connect(function()
+            if game.Players.LocalPlayer.Character:FindFirstChild("[Popcorn]") then
+                game.Players.LocalPlayer.Character["[Popcorn]"].Handle.Part.Material = Material
+                game.Players.LocalPlayer.Character["[Popcorn]"].Handle.Part.Color = Color
+                game.Players.LocalPlayer.Character["[Popcorn]"].Handle.Part.TextureID = ""
+            end
+        end)
+
+        game:GetService"RunService".RenderStepped:Connect(function()
+            if game.Players.LocalPlayer.Character:FindFirstChild("[Hamburger]") then
+                game.Players.LocalPlayer.Character["[Hamburger]"].Handle.Part.Material = Material
+                game.Players.LocalPlayer.Character["[Hamburger]"].Handle.Part.Color = Color
+                game.Players.LocalPlayer.Character["[Hamburger]"].Handle.Part.TextureID = ""
+            end
+        end)
+
+        game:GetService"RunService".RenderStepped:Connect(function()
+            if game.Players.LocalPlayer.Character:FindFirstChild("[Pizza]") then
+                game.Players.LocalPlayer.Character["[Pizza]"].Handle.Part.Material = Material
+                game.Players.LocalPlayer.Character["[Pizza]"].Handle.Part.Color = Color
+                game.Players.LocalPlayer.Character["[Pizza]"].Handle.Part.TextureID = ""
+            end
+        end)
+
+        game:GetService"RunService".RenderStepped:Connect(function()
+            if game.Players.LocalPlayer.Character:FindFirstChild("[Cranberry]") then
+                game.Players.LocalPlayer.Character["[Cranberry]"].Handle.Part.Material = Material
+                game.Players.LocalPlayer.Character["[Cranberry]"].Handle.Part.Color = Color
+                game.Players.LocalPlayer.Character["[Cranberry]"].Handle.Part.TextureID = ""
+            end
+        end)
+
+        game:GetService"RunService".RenderStepped:Connect(function()
+            if game.Players.LocalPlayer.Character:FindFirstChild("[Knife]") then
+                game.Players.LocalPlayer.Character["[Knife]"].Default.Material = Material
+                game.Players.LocalPlayer.Character["[Knife]"].Default.Color = Color
+                game.Players.LocalPlayer.Character["[Knife]"].Default.TextureID = ""
+            end
+        end)
+    
+        game:GetService"RunService".RenderStepped:Connect(function()
+            if game.Players.LocalPlayer.Character:FindFirstChild("[Silencer]") then
+                game.Players.LocalPlayer.Character["[Silencer]"].Default.Material = Material
+                game.Players.LocalPlayer.Character["[Silencer]"].Default.Color = Color
+                game.Players.LocalPlayer.Character["[Silencer]"].Default.TextureID = ""
+            end
+        end)
+    
+        game:GetService"RunService".RenderStepped:Connect(function()
+            if game.Players.LocalPlayer.Character:FindFirstChild("[AR]") then
+                game.Players.LocalPlayer.Character["[AR]"].Default.Material = Material
+                game.Players.LocalPlayer.Character["[AR]"].Default.Color = Color
+                game.Players.LocalPlayer.Character["[AR]"].Default.TextureID = ""
+            end
+        end)
+    
+        game:GetService"RunService".RenderStepped:Connect(function()
+            if game.Players.LocalPlayer.Character:FindFirstChild("[TacticalShotgun]") then
+                game.Players.LocalPlayer.Character["[TacticalShotgun]"].Default.Material = Material
+                game.Players.LocalPlayer.Character["[TacticalShotgun]"].Default.Color = Color
+                game.Players.LocalPlayer.Character["[TacticalShotgun]"].Default.TextureID = ""
+            end
+        end)
+    
+        game:GetService"RunService".RenderStepped:Connect(function()
+            if game.Players.LocalPlayer.Character:FindFirstChild("[P90]") then
+                game.Players.LocalPlayer.Character["[P90]"].Default.Material = Material
+                game.Players.LocalPlayer.Character["[P90]"].Default.Color = Color
+                game.Players.LocalPlayer.Character["[P90]"].Default.TextureID = ""
+            end
+        end)
+    
+        game:GetService"RunService".RenderStepped:Connect(function()
+            if game.Players.LocalPlayer.Character:FindFirstChild("[AUG]") then
+                game.Players.LocalPlayer.Character["[AUG]"].Default.Material = Material
+                game.Players.LocalPlayer.Character["[AUG]"].Default.Color = Color
+                game.Players.LocalPlayer.Character["[AUG]"].Default.TextureID = ""
+            end
+        end)
+    
+        game:GetService"RunService".RenderStepped:Connect(function()
+            if game.Players.LocalPlayer.Character:FindFirstChild("[SMG]") then
+                game.Players.LocalPlayer.Character["[SMG]"].Default.Material = Material
+                game.Players.LocalPlayer.Character["[SMG]"].Default.Color = Color
+                game.Players.LocalPlayer.Character["[SMG]"].Default.TextureID = ""
+            end
+        end)
+    
+        game:GetService"RunService".RenderStepped:Connect(function()
+            if game.Players.LocalPlayer.Character:FindFirstChild("[Shotgun]") then
+                game.Players.LocalPlayer.Character["[Shotgun]"].Default.Material = Material
+                game.Players.LocalPlayer.Character["[Shotgun]"].Default.Color = Color
+                game.Players.LocalPlayer.Character["[Shotgun]"].Default.TextureID = ""
+            end
+        end)
+    
+        game:GetService"RunService".RenderStepped:Connect(function()
+            if game.Players.LocalPlayer.Character:FindFirstChild("[RPG]") then
+                game.Players.LocalPlayer.Character["[RPG]"].Default.Material = Material
+                game.Players.LocalPlayer.Character["[RPG]"].Default.Color = Color
+                game.Players.LocalPlayer.Character["[RPG]"].Default.TextureID = ""
+            end
+        end)
+    
+        game:GetService"RunService".RenderStepped:Connect(function()
+            if game.Players.LocalPlayer.Character:FindFirstChild("[Double-Barrel SG]") then
+                game.Players.LocalPlayer.Character["[Double-Barrel SG]"].Default.Material = Material
+                game.Players.LocalPlayer.Character["[Double-Barrel SG]"].Default.Color = Color
+                game.Players.LocalPlayer.Character["[Double-Barrel SG]"].Default.TextureID = ""
+            end
+        end)
+    
+        game:GetService"RunService".RenderStepped:Connect(function()
+            if game.Players.LocalPlayer.Character:FindFirstChild("[Flamethrower]") then
+                game.Players.LocalPlayer.Character["[Flamethrower]"].Default.Material = Material
+                game.Players.LocalPlayer.Character["[Flamethrower]"].Default.Color = Color
+                game.Players.LocalPlayer.Character["[Flamethrower]"].Default.TextureID = ""
+            end
+        end)
+        
+        game:GetService"RunService".RenderStepped:Connect(function()
+            if game.Players.LocalPlayer.Character:FindFirstChild("[GrenadeLaucher]") then
+                game.Players.LocalPlayer.Character["[GrenadeLaucher]"].Default.Material = Material
+                game.Players.LocalPlayer.Character["[GrenadeLaucher]"].Default.Color = Color
+                game.Players.LocalPlayer.Character["[GrenadeLaucher]"].Default.TextureID = ""
+            end
+        end)
+    
+        game:GetService"RunService".RenderStepped:Connect(function()
+            if game.Players.LocalPlayer.Character:FindFirstChild("[Revolver]") then
+                game.Players.LocalPlayer.Character["[Revolver]"].Default.Material = Material
+                game.Players.LocalPlayer.Character["[Revolver]"].Default.Color = Color
+                game.Players.LocalPlayer.Character["[Revolver]"].Default.TextureID = ""
+            end
+        end)
+        
+        game:GetService"RunService".RenderStepped:Connect(function()
+            if game.Players.LocalPlayer.Character:FindFirstChild("[Grenade]") then
+                game.Players.LocalPlayer.Character["[Grenade]"].Default.Material = Material
+                game.Players.LocalPlayer.Character["[Grenade]"].Default.Color = Color
+                game.Players.LocalPlayer.Character["[Grenade]"].Default.TextureID = ""
+            end
+        end)
+        
+        game:GetService"RunService".RenderStepped:Connect(function()
+            if game.Players.LocalPlayer.Character:FindFirstChild("[LMG]") then
+                game.Players.LocalPlayer.Character["[LMG]"].Default.Material = Material
+                game.Players.LocalPlayer.Character["[LMG]"].Default.Color = Color
+                game.Players.LocalPlayer.Character["[LMG]"].Default.TextureID = ""
+            end
+        end)
+    
+        game:GetService"RunService".RenderStepped:Connect(function()
+            if game.Players.LocalPlayer.Character:FindFirstChild("[AK47]") then
+                game.Players.LocalPlayer.Character["[AK47]"].Default.Material = Material
+                game.Players.LocalPlayer.Character["[AK47]"].Default.Color = Color
+                game.Players.LocalPlayer.Character["[AK47]"].Default.TextureID = ""
+            end
+        end)
+    
+        game:GetService"RunService".RenderStepped:Connect(function()
+            if game.Players.LocalPlayer.Character:FindFirstChild("[DrumGun]") then
+                game.Players.LocalPlayer.Character["[DrumGun]"].Default.Material = Material
+                game.Players.LocalPlayer.Character["[DrumGun]"].Default.Color = Color
+                game.Players.LocalPlayer.Character["[DrumGun]"].Default.TextureID = ""
+            end
+        end)
+    
+        game:GetService"RunService".RenderStepped:Connect(function()
+            if game.Players.LocalPlayer.Character:FindFirstChild("[SilencerAR]") then
+                game.Players.LocalPlayer.Character["[SilencerAR]"].Default.Material = Material
+                game.Players.LocalPlayer.Character["[SilencerAR]"].Default.Color = Color
+                game.Players.LocalPlayer.Character["[SilencerAR]"].Default.TextureID = ""
+            end
+        end)
     end
-    game:GetService("RunService").Heartbeat:Connect(updateClockTime)
+end})
+
+
+VisualPurpSection:button({name = "purple ui", callback = function()
+local r, g, b = 170, 0, 255
+game:GetService("RunService").RenderStepped:Connect(function()
+    game.Players.LocalPlayer.PlayerGui.MainScreenGui.Bar.Armor.Picture.BackgroundColor3 = Color3.fromRGB(r, g, b)
+    game.Players.LocalPlayer.PlayerGui.MainScreenGui.Bar.Armor.Picture.Border.BackgroundColor3 = Color3.fromRGB(r, g, b)
+    game.Players.LocalPlayer.PlayerGui.MainScreenGui.Bar.Armor.Picture.Border.ImageColor3 = Color3.fromRGB(r, g, b)
+    game.Players.LocalPlayer.PlayerGui.MainScreenGui.Bar.Armor.Picture.Image.ImageColor3 = Color3.fromRGB(r, g, b)
+    game.Players.LocalPlayer.PlayerGui.MainScreenGui.Bar.Armor.bar.BackgroundColor3 = Color3.fromRGB(r, g, b)
+    game.Players.LocalPlayer.PlayerGui.MainScreenGui.Bar.Armor.TextLabel.Text = "todays tolerance for niggers"
+    game.Players.LocalPlayer.PlayerGui.MainScreenGui.Bar.Armor.TextLabel.TextScaled = true
+
+    game.Players.LocalPlayer.PlayerGui.MainScreenGui.Bar.Energy.Picture.BackgroundColor3 = Color3.fromRGB(r, g, b)
+    game.Players.LocalPlayer.PlayerGui.MainScreenGui.Bar.Energy.Picture.Border.BackgroundColor3 = Color3.fromRGB(r, g, b)
+    game.Players.LocalPlayer.PlayerGui.MainScreenGui.Bar.Energy.Picture.Border.ImageColor3 = Color3.fromRGB(r, g, b)
+    game.Players.LocalPlayer.PlayerGui.MainScreenGui.Bar.Energy.Picture.Image.ImageColor3 = Color3.fromRGB(r, g, b)
+    game.Players.LocalPlayer.PlayerGui.MainScreenGui.Bar.Energy.bar.BackgroundColor3 = Color3.fromRGB(r, g, b)
+    game.Players.LocalPlayer.PlayerGui.MainScreenGui.Bar.Energy.TextLabel.Text = "todays energy for raping kids"
+    game.Players.LocalPlayer.PlayerGui.MainScreenGui.Bar.Energy.TextLabel.TextScaled = true
+    
+    game.Players.LocalPlayer.PlayerGui.MainScreenGui.Bar.HP.Picture.BackgroundColor3 = Color3.fromRGB(r, g, b)
+    game.Players.LocalPlayer.PlayerGui.MainScreenGui.Bar.HP.Picture.Border.BackgroundColor3 = Color3.fromRGB(r, g, b)
+    game.Players.LocalPlayer.PlayerGui.MainScreenGui.Bar.HP.Picture.Border.ImageColor3 = Color3.fromRGB(r, g, b)
+    game.Players.LocalPlayer.PlayerGui.MainScreenGui.Bar.HP.Picture.Image.ImageColor3 = Color3.fromRGB(r, g, b)
+    game.Players.LocalPlayer.PlayerGui.MainScreenGui.Bar.HP.bar.BackgroundColor3 = Color3.fromRGB(r, g, b)
+    game.Players.LocalPlayer.PlayerGui.MainScreenGui.Bar.HP.TextLabel.Text = "love for gay sex"
+    game.Players.LocalPlayer.PlayerGui.MainScreenGui.Bar.HP.TextLabel.TextScaled = true
+
+    game.Players.LocalPlayer.PlayerGui.MainScreenGui.Crew.BottomLeft.Frame.Crew.ImageColor3 = Color3.fromRGB(r, g, b) 
+    game.Players.LocalPlayer.PlayerGui.MainScreenGui.Crew.BottomLeft.Frame.Settings.ImageColor3 = Color3.fromRGB(r, g, b) 
+    game.Players.LocalPlayer.PlayerGui.MainScreenGui.Crew.BottomLeft.Frame.Edit.ImageColor3 = Color3.fromRGB(r, g, b) 
+    game.Players.LocalPlayer.PlayerGui.MainScreenGui.Crew.BottomLeft.Frame.Skins.ImageColor3 = Color3.fromRGB(r, g, b) 
+    game.Players.LocalPlayer.PlayerGui.MainScreenGui.Crew.BottomLeft.Frame.Task.ImageColor3 = Color3.fromRGB(r, g, b) 
+    game.Players.LocalPlayer.PlayerGui.MainScreenGui.Promote.ImageButton.ImageColor3 = Color3.fromRGB(r, g, b)   
+    game.Players.LocalPlayer.PlayerGui.MainScreenGui.Crew.BottomLeft.Frame.ZShopButton.ImageLabel.ImageColor3 = Color3.fromRGB(r, g, b) 
+    game.Players.LocalPlayer.PlayerGui.MainScreenGui.Crew.BottomLeft.Frame.ZShopButton.TextLabel.Text = "NIGGA"
+    game.Players.LocalPlayer.PlayerGui.MainScreenGui.Crew.BottomLeft.Frame.ZShopButton.TextLabel.TextColor3 = Color3.fromRGB(r, g, b)
+    game.Players.LocalPlayer.PlayerGui.MainScreenGui.MoneyText.TextColor3 = Color3.fromRGB(r, g, b)
+    game.Players.LocalPlayer.PlayerGui.MainScreenGui.WalletDrop.TextButton.Text = "RAPE NIGGERS"
+    game.Players.LocalPlayer.PlayerGui.MainScreenGui.WalletDrop.TextBox.Text = "drop atleast $100 broke ass nigga"
+    game.Players.LocalPlayer.PlayerGui.MainScreenGui.WalletDrop.TextBox.TextScaled = true
+    wait(3)
+end)
+
 end})
 
 --// Misc Sections
@@ -431,6 +876,11 @@ end})
 MiscFunSettings:button({name = "the curse", callback = function()
 local newSoundId = "rbxassetid://9059590824" local function replaceSoundIds(parent) for _, child in pairs(parent:GetChildren()) do if child:IsA("Sound") then child.SoundId = newSoundId end replaceSoundIds(child) end end replaceSoundIds(game.Workspace.Vehicles) while wait(1) do replaceSoundIds(game.Workspace.Vehicles) end
 end})
+
+MiscDbgSettings:button({name = "rejoin server", callback = function()
+    game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId,game.JobId)
+end})
+
 
 -- item buyer
 
@@ -512,7 +962,7 @@ BuyArmorSection:button({name = "buy medium armor ($1326)", callback = function()
 end})
 
 
-BuyArmorSection:button({name = "buy high-medium armor ($2440)", callback = function()
+BuyArmorSection:button({name = "buy high armor ($2440)", callback = function()
     wait(0.1)
     getgenv().ogPos = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame
     wait(0.1)
@@ -635,53 +1085,62 @@ Mouse.KeyDown:Connect(function(a)
 end)
 
 RService.RenderStepped:Connect(function()
- if PuppySettings.Aimbot.Enabled then
-    if getgenv().ThirdPerson == true and getgenv().FirstPerson == true then 
-        if (Camera.Focus.p - Camera.CoordinateFrame.p).Magnitude > 1 or (Camera.Focus.p - Camera.CoordinateFrame.p).Magnitude <= 1 then 
-            CanNotify = true 
-        else 
-            CanNotify = false 
+    if PuppySettings.Aimbot.Enabled then
+        if getgenv().ThirdPerson == true and getgenv().FirstPerson == true then
+            CanNotify = (Camera.Focus.p - Camera.CoordinateFrame.p).Magnitude > 1 or (Camera.Focus.p - Camera.CoordinateFrame.p).Magnitude <= 1
+        elseif getgenv().ThirdPerson == true and getgenv().FirstPerson == false then
+            CanNotify = (Camera.Focus.p - Camera.CoordinateFrame.p).Magnitude > 1
+        elseif getgenv().ThirdPerson == false and getgenv().FirstPerson == true then
+            CanNotify = (Camera.Focus.p - Camera.CoordinateFrame.p).Magnitude <= 1
         end
-    elseif getgenv().ThirdPerson == true and getgenv().FirstPerson == false then 
-        if (Camera.Focus.p - Camera.CoordinateFrame.p).Magnitude > 1 then 
-            CanNotify = true 
-        else 
-            CanNotify = false 
-        end
-    elseif getgenv().ThirdPerson == false and getgenv().FirstPerson == true then 
-        if (Camera.Focus.p - Camera.CoordinateFrame.p).Magnitude <= 1 then 
-            CanNotify = true 
-        else 
-            CanNotify = false 
-        end
-    end
-    if PuppySettings.Aimbot.Enabled == true and MousePressed == true then 
-        if AimlockTarget and AimlockTarget.Character and AimlockTarget.Character:FindFirstChild(PuppySettings.Aimbot.Hitboxes) then 
-            if getgenv().FirstPerson == true then
-                if CanNotify == true then
-                    if PuppySettings.Aimbot.Prediction == true then
-                        if PuppySettings.AimbotSettings.Smoothness == true then
-                            --// The part we're going to lerp/smoothen \\--
-                            local Main = CF(Camera.CFrame.p, AimlockTarget.Character[PuppySettings.Aimbot.Hitboxes].Position + AimlockTarget.Character[PuppySettings.Aimbot.Hitboxes].Velocity/PuppySettings.AimbotSettings.PredictionVelocity)
-                            
-                            --// Making it work \\--
-                            Camera.CFrame = Camera.CFrame:Lerp(Main, PuppySettings.AimbotSettings.SmoothnessAmmount, Enum.EasingStyle.Elastic, Enum.EasingDirection.InOut)
-                        else
-                            Camera.CFrame = CF(Camera.CFrame.p, AimlockTarget.Character[PuppySettings.Aimbot.Hitboxes].Position + AimlockTarget.Character[PuppySettings.Aimbot.Hitboxes].Velocity/PuppySettings.AimbotSettings.PredictionVelocity)
-                        end
-                    elseif PuppySettings.Aimbot.Prediction == false then 
-                        if PuppySettings.AimbotSettings.Smoothness == true then
-                            local Main = CF(Camera.CFrame.p, AimlockTarget.Character[PuppySettings.Aimbot.Hitboxes].Position)
-                            Camera.CFrame = Camera.CFrame:Lerp(Main,  PuppySettings.AimbotSettings.SmoothnessAmmount, Enum.EasingStyle.Elastic, Enum.EasingDirection.InOut)
-                        else
-                            Camera.CFrame = CF(Camera.CFrame.p, AimlockTarget.Character[PuppySettings.Aimbot.Hitboxes].Position)
-                        end
+
+        if MousePressed == true and AimlockTarget and AimlockTarget.Character and AimlockTarget.Character:FindFirstChild(PuppySettings.Aimbot.Hitboxes) then
+            if getgenv().FirstPerson == true and CanNotify == true then
+                if PuppySettings.Aimbot.Prediction == true then
+                    local targetPos = AimlockTarget.Character[PuppySettings.Aimbot.Hitboxes].Position + AimlockTarget.Character[PuppySettings.Aimbot.Hitboxes].Velocity / PuppySettings.AimbotSettings.PredictionVelocity
+                    local Main = CF(Camera.CFrame.p, targetPos)
+                    if PuppySettings.AimbotSettings.Smoothness == true then
+                        Camera.CFrame = Camera.CFrame:Lerp(Main, PuppySettings.AimbotSettings.SmoothnessAmmount, Enum.EasingStyle.Elastic, Enum.EasingDirection.InOut)
+                    else
+                        Camera.CFrame = CF(Camera.CFrame.p, targetPos)
+                    end
+                else
+                    local targetPos = AimlockTarget.Character[PuppySettings.Aimbot.Hitboxes].Position
+                    local Main = CF(Camera.CFrame.p, targetPos)
+                    if PuppySettings.AimbotSettings.Smoothness == true then
+                        Camera.CFrame = Camera.CFrame:Lerp(Main, PuppySettings.AimbotSettings.SmoothnessAmmount, Enum.EasingStyle.Elastic, Enum.EasingDirection.InOut)
+                    else
+                        Camera.CFrame = CF(Camera.CFrame.p, targetPos)
+                    end
+                end
+                
+                -- Highlight the target if chams are enabled
+                if getgenv().targetChams == true then
+                    if currentTarget ~= AimlockTarget then
+                        removeHighlight()
+                        currentHighlight = Instance.new("Highlight")
+                        currentHighlight.Name = AimlockTarget.Name
+                        currentHighlight.FillColor = Color3.fromRGB(193, 0, 255)
+                        currentHighlight.DepthMode = "AlwaysOnTop"
+                        currentHighlight.FillTransparency = 0.25
+                        currentHighlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+                        currentHighlight.OutlineTransparency = 0.35
+                        currentHighlight.Adornee = AimlockTarget.Character
+                        currentHighlight.Parent = HighlightFolder
+                        currentTarget = AimlockTarget
+                    else
+                        currentHighlight.Adornee = AimlockTarget.Character
                     end
                 end
             end
+        else
+            -- Remove the highlight when the lock is released
+            removeHighlight()
         end
+    else
+        -- Remove highlight if Aimbot is disabled
+        removeHighlight()
     end
-end 
 end)
 
 function NoSpace(Data)
