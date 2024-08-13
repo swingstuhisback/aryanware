@@ -848,13 +848,6 @@ end)
 end})
 
 --// Misc Sections
-local TimeTick
-TimeTick = hookfunction(wait, function(JumpCooldown)
- if JumpCooldown == 1.5 and (PuppySettings.Misc.CFrameSpeed.Bhop and PuppySettings.Misc.CFrameSpeed.Enabled) or PuppySettings.Misc.Strafe then 
-  return TimeTick()
-    end
-    return TimeTick(JumpCooldown)
-end)
 
 MiscMoveSettings:toggle({name = "walkspeed", def = false, callback = function(Boolean)
  PuppySettings.Misc.CFrameSpeed.Enabled = Boolean
